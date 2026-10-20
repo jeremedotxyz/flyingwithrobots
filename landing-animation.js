@@ -8,7 +8,8 @@
     boat:'robot-ship.webp',
     rocket:'robot-rocket.webp',
     cloud1:'landing-cloud-1.webp', cloud2:'landing-cloud-2.webp', cloud3:'landing-cloud-3.webp',
-    ring:'landing-planet-ring.webp', crater:'landing-planet-crater.webp'
+    ring:'landing-planet-ring.webp', crater:'landing-planet-crater.webp',
+    wave1:'landing-wave-1.webp', wave2:'landing-wave-2.webp'
   };
   const art = {};
   for (const [key,file] of Object.entries(files)) {
@@ -60,6 +61,15 @@
       w*(portrait?.91:.58),h*(portrait?.42:.62),Math.sin(p*6)*.012);
   }
   function boat(p) {
+    for (let row=0; row<3; row++) {
+      const size=Math.max(82,Math.min(w*(.11+row*.01),125));
+      const count=Math.ceil(w/(size*.82))+3;
+      for (let i=0; i<count; i++) {
+        const x=wrap(i*size*.82+row*size*.39-p*w*(.34+row*.07),w+size*2)-size;
+        const y=h*(.74+row*.085);
+        draw((i+row)%5===0?'wave2':'wave1',x,y,size,size*.42,0,.7-row*.12);
+      }
+    }
     const portrait=w/h<.8;
     draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)),h*.51+Math.sin(p*12)*10,
       w*(portrait?.91:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
@@ -67,6 +77,9 @@
   function rocket(p) {
     draw('ring',w*.16,h*(.72-p*.38),Math.min(w*.24,200),Math.min(h*.18,130));
     draw('crater',w*.82,h*(.28+p*.28),Math.min(w*.18,150),Math.min(h*.14,110));
+    draw('ring',w*.73,h*(.78-p*.24),Math.min(w*.15,125),Math.min(h*.11,85),0,.78);
+    draw('crater',w*.29,h*(.18+p*.18),Math.min(w*.13,105),Math.min(h*.09,70),0,.8);
+    draw('ring',w*.91,h*(.11+p*.13),Math.min(w*.1,90),Math.min(h*.07,55),0,.65);
     const portrait=w/h<.8;
     draw('rocket',w*(.49+(p-.5)*(portrait?.06:.13)),h*(.52-p*.08)+Math.sin(p*12)*4,
       w*(portrait?.63:.32),h*(portrait?.46:.67),Math.sin(p*6)*.01);
