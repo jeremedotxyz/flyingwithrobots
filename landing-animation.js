@@ -17,12 +17,14 @@
   }
   let w=0,h=0;
   function resize() {
-    w=window.innerWidth; h=window.innerHeight;
+    w=canvas.clientWidth; h=canvas.clientHeight;
     const dpr=Math.min(window.devicePixelRatio||1,2);
     canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  addEventListener('resize',resize); resize();
+  addEventListener('resize',resize);
+  new ResizeObserver(resize).observe(canvas);
+  resize();
   const wrap=(v,max)=>((v%max)+max)%max;
   function draw(name,x,y,maxW,maxH,rotation=0,alpha=1) {
     const image=art[name]; if(!image)return;
@@ -41,7 +43,10 @@
     for(const [copy,alpha,size,weight] of cards){
       if(alpha<=0)continue;
       ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle='#111';
-      ctx.font=`${weight} ${Math.min(size*h/600,w/(copy.length*.51))}px Helvetica, Arial, sans-serif`;
+      let fontSize=size*h/600;
+      ctx.font=`${weight} ${fontSize}px Helvetica, Arial, sans-serif`;
+      fontSize=Math.min(fontSize,fontSize*(w-48)/ctx.measureText(copy).width);
+      ctx.font=`${weight} ${fontSize}px Helvetica, Arial, sans-serif`;
       ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(copy,w/2,h/2);ctx.restore();
     }
   }
@@ -61,16 +66,16 @@
       w*(portrait?.91:.58),h*(portrait?.42:.62),Math.sin(p*6)*.012);
   }
   function boat(p) {
+    const portrait=w/h<.8;
     for (let row=0; row<3; row++) {
       const size=Math.max(82,Math.min(w*(.11+row*.01),125));
       const count=Math.ceil(w/(size*.82))+3;
       for (let i=0; i<count; i++) {
         const x=wrap(i*size*.82+row*size*.39-p*w*(.34+row*.07),w+size*2)-size;
-        const y=h*(.74+row*.085);
+        const y=h*((portrait?.69:.74)+row*.085);
         draw((i+row)%5===0?'wave2':'wave1',x,y,size,size*.42,0,.7-row*.12);
       }
     }
-    const portrait=w/h<.8;
     draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)),h*.51+Math.sin(p*12)*10,
       w*(portrait?.91:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
   }
@@ -82,7 +87,7 @@
     draw('ring',w*.91,h*(.11+p*.13),Math.min(w*.1,90),Math.min(h*.07,55),0,.65);
     const portrait=w/h<.8;
     draw('rocket',w*(.49+(p-.5)*(portrait?.06:.13)),h*(.52-p*.08)+Math.sin(p*12)*4,
-      w*(portrait?.63:.32),h*(portrait?.46:.67),Math.sin(p*6)*.01);
+      w*(portrait?.75:.32),h*(portrait?.53:.67),Math.sin(p*6)*.01);
   }
   function paint() {
     ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
