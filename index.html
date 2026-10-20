@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>fw/r — Flying With Robots</title>
   <meta name="description" content="Flying With Robots. AI, robotics, and LiDAR. Coming soon.">
-  <link rel="stylesheet" href="landing.css">
+  <link rel="stylesheet" href="landing.css?v=20261020-water2">
 </head>
 <body>
   <main aria-label="Flying With Robots">
@@ -14,8 +14,14 @@
     <video id="journey" class="journey-source" autoplay muted loop playsinline preload="auto" poster="poster.jpg" aria-hidden="true">
       <source src="exports/fwr-journey-acoustic-score.mp4" type="video/mp4">
     </video>
-    <button id="sound" class="sound" type="button" aria-label="Turn sound on">sound on</button>
+    <button id="sound" class="sound" type="button" aria-label="Turn sound on" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 9h4l5-4v14l-5-4H4z"/>
+        <path class="sound-on" d="M16 9a4 4 0 0 1 0 6m2.5-9a8 8 0 0 1 0 12"/>
+        <path class="sound-off" d="m17 9 4 6m0-6-4 6"/>
+      </svg>
+    </button>
   </main>
-  <script src="landing-animation.js" defer></script>
+  <script src="landing-animation.js?v=20261020-water2" defer></script>
 </body>
 </html>

@@ -8,8 +8,7 @@
     boat:'robot-ship.webp',
     rocket:'robot-rocket.webp',
     cloud1:'landing-cloud-1.webp', cloud2:'landing-cloud-2.webp', cloud3:'landing-cloud-3.webp',
-    ring:'landing-planet-ring.webp', crater:'landing-planet-crater.webp',
-    wave1:'landing-wave-1.webp', wave2:'landing-wave-2.webp'
+    ring:'landing-planet-ring.webp', crater:'landing-planet-crater.webp'
   };
   const art = {};
   for (const [key,file] of Object.entries(files)) {
@@ -37,7 +36,7 @@
   function drawCards(t) {
     const cards=[
       ['robinson has found a new home.',fade(t,.3,1.05,2.45,3),52,400],
-      ['christmas 2026',fade(t,3.25,3.9,5.2,5.7),54,400],
+      ['christmas 2026',fade(t,3.25,3.9,5.2,5.7),52,400],
       ['fw/r',fade(t,5.95,6.65,7.85,8.3),84,600]
     ];
     for(const [copy,alpha,size,weight] of cards){
@@ -45,7 +44,9 @@
       ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle='#111';
       let fontSize=size*h/600;
       ctx.font=`${weight} ${fontSize}px Helvetica, Arial, sans-serif`;
-      fontSize=Math.min(fontSize,fontSize*(w-48)/ctx.measureText(copy).width);
+      const measuredCopy=weight===400?'robinson has found a new home.':copy;
+      ctx.font=`${weight} ${fontSize}px Helvetica, Arial, sans-serif`;
+      fontSize=Math.min(fontSize,fontSize*(w-48)/ctx.measureText(measuredCopy).width);
       ctx.font=`${weight} ${fontSize}px Helvetica, Arial, sans-serif`;
       ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(copy,w/2,h/2);ctx.restore();
     }
@@ -67,17 +68,35 @@
   }
   function boat(p) {
     const portrait=w/h<.8;
-    for (let row=0; row<3; row++) {
-      const size=Math.max(82,Math.min(w*(.11+row*.01),125));
-      const count=Math.ceil(w/(size*.82))+3;
-      for (let i=0; i<count; i++) {
-        const x=wrap(i*size*.82+row*size*.39-p*w*(.34+row*.07),w+size*2)-size;
-        const y=h*((portrait?.69:.74)+row*.085);
-        draw((i+row)%5===0?'wave2':'wave1',x,y,size,size*.42,0,.7-row*.12);
+    const waterline=h*(portrait?.60:.69);
+    function wavePath(y,offset) {
+      const span=Math.max(100,Math.min(w*.18,190));
+      const shift=wrap(offset,span);
+      ctx.beginPath();ctx.moveTo(-span-shift,y);
+      for(let x=-span-shift,i=0;x<w+span;x+=span,i++){
+        const crest=13+10*(.5+.5*Math.sin(i*2.3+1.1));
+        ctx.quadraticCurveTo(x+span*.23,y+3,x+span*.49,y-crest);
+        ctx.quadraticCurveTo(x+span*.68,y+5,x+span,y);
       }
     }
     draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)),h*.51+Math.sin(p*12)*10,
       w*(portrait?.91:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
+    ctx.save();
+    wavePath(waterline,p*w*.25);
+    ctx.lineTo(w+200,h+20);ctx.lineTo(-200,h+20);ctx.closePath();
+    ctx.fillStyle='#f8f8f8';ctx.fill();
+    wavePath(waterline,p*w*.25);
+    ctx.strokeStyle='#151515';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+    ctx.strokeStyle='#777';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+      const x=wrap(w*(.1+i*.27)-p*w*.19,w+100)-50;
+      const y=waterline+h*(.095+(i%2)*.09);
+      ctx.beginPath();ctx.moveTo(x,y);
+      ctx.quadraticCurveTo(x+18,y-7,x+36,y-2);
+      ctx.quadraticCurveTo(x+48,y+2,x+64,y-2);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
   function rocket(p) {
     draw('ring',w*.16,h*(.72-p*.38),Math.min(w*.24,200),Math.min(h*.18,130));
@@ -107,8 +126,8 @@
   requestAnimationFrame(paint);
   sound.addEventListener('click',async()=>{
     if(video.muted){
-      video.muted=false;video.currentTime=0;sound.textContent='sound off';sound.setAttribute('aria-label','Turn sound off');
-      try{await video.play();}catch(_){video.muted=true;sound.textContent='sound on';sound.setAttribute('aria-label','Turn sound on');}
-    }else{video.muted=true;sound.textContent='sound on';sound.setAttribute('aria-label','Turn sound on');}
+      video.muted=false;video.currentTime=0;sound.setAttribute('aria-label','Turn sound off');sound.setAttribute('aria-pressed','true');
+      try{await video.play();}catch(_){video.muted=true;sound.setAttribute('aria-label','Turn sound on');sound.setAttribute('aria-pressed','false');}
+    }else{video.muted=true;sound.setAttribute('aria-label','Turn sound on');sound.setAttribute('aria-pressed','false');}
   });
 })();
