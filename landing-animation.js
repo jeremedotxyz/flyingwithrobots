@@ -25,11 +25,11 @@
   new ResizeObserver(resize).observe(canvas);
   resize();
   const wrap=(v,max)=>((v%max)+max)%max;
-  function draw(name,x,y,maxW,maxH,rotation=0,alpha=1) {
+  function draw(name,x,y,maxW,maxH,rotation=0,alpha=1,flip=1) {
     const image=art[name]; if(!image)return;
     const scale=Math.min(maxW/image.width,maxH/image.height);
     const iw=image.width*scale, ih=image.height*scale;
-    ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.rotate(rotation);
+    ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.rotate(rotation);ctx.scale(flip,1);
     ctx.drawImage(image,-iw/2,-ih/2,iw,ih);ctx.restore();
   }
   function fade(t,a,b,c,d){if(t<a||t>=d)return 0;if(t<b)return(t-a)/(b-a);if(t<=c)return 1;return(d-t)/(d-c);}
@@ -79,18 +79,11 @@
         ctx.quadraticCurveTo(x+span*.68,y+5,x+span,y);
       }
     }
-    // The whale rises once, pauses beside the boat, then sinks below the surface.
+    // A brief foreground cameo: surface, splash, turn, and dive the other way.
     const ease=v=>v*v*(3-2*v);
-    const rise=p<.17?0:p<.37?ease((p-.17)/.2):p<.64?1:p<.86?1-ease((p-.64)/.22):0;
-    draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)-(portrait?.1*rise:0)),h*.51+Math.sin(p*12)*10,
-      w*(portrait?.91-.22*rise:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
-    if(rise>0){
-      const narwhalWidth=w*(portrait?.29:.23);
-      const narwhalHeight=Math.min(narwhalWidth*800/1170,h*.27);
-      const nx=w*(portrait?.84:.86)+Math.sin(p*8)*w*.01;
-      const ny=waterline+narwhalHeight*(.55-rise);
-      draw('narwhal',nx,ny,narwhalWidth,narwhalHeight,Math.sin(p*7)*.025);
-    }
+    const rise=p<.15?0:p<.36?ease((p-.15)/.21):p<.58?1:p<.86?1-ease((p-.58)/.28):0;
+    draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)),h*.51+Math.sin(p*12)*10,
+      w*(portrait?.91:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
     ctx.save();
     wavePath(waterline,p*w*.25);
     ctx.lineTo(w+200,h+20);ctx.lineTo(-200,h+20);ctx.closePath();
@@ -105,6 +98,37 @@
       ctx.quadraticCurveTo(x+18,y-7,x+36,y-2);
       ctx.quadraticCurveTo(x+48,y+2,x+64,y-2);
       ctx.stroke();
+    }
+    if(rise>0){
+      const narwhalWidth=w*(portrait?.49:.21);
+      const narwhalHeight=Math.min(narwhalWidth*800/1170,h*.25);
+      const surface=h*(portrait?.84:.9);
+      const enter=ease(Math.max(0,Math.min(1,(p-.15)/.32)));
+      const leave=ease(Math.max(0,Math.min(1,(p-.58)/.28)));
+      const nx=w*(.53-.07*enter+.2*leave);
+      const ny=surface+narwhalHeight*(.55-rise);
+      const facing=1-2*ease(Math.max(0,Math.min(1,(p-.53)/.15)));
+      ctx.save();ctx.beginPath();ctx.rect(0,0,w,surface);ctx.clip();
+      draw('narwhal',nx,ny,narwhalWidth,narwhalHeight,(p-.5)*.11,1,facing);
+      ctx.restore();
+      const ripple=narwhalWidth*(.28+.2*rise);
+      ctx.strokeStyle='#222';ctx.lineWidth=1.8;ctx.globalAlpha=.75;
+      for(const side of [-1,1]){
+        ctx.beginPath();ctx.moveTo(nx+side*narwhalWidth*.23,surface+2);
+        ctx.quadraticCurveTo(nx+side*ripple,surface-6,nx+side*(ripple+18),surface+2);
+        ctx.stroke();
+      }
+      const splash=Math.max(0,1-Math.abs(p-.32)/.15)+Math.max(0,1-Math.abs(p-.72)/.13);
+      ctx.globalAlpha=Math.min(1,splash);
+      for(const side of [-1,1])for(let i=0;i<3;i++){
+        const sx=nx+side*(narwhalWidth*(.26+i*.1));
+        const sy=surface-10-i*9-splash*13;
+        const tipX=sx+side*(15+i*5),tipY=sy-18-i*5;
+        ctx.beginPath();ctx.moveTo(sx,sy+9);
+        ctx.quadraticCurveTo(sx+side*6,sy-9,tipX,tipY);
+        ctx.stroke();
+        ctx.beginPath();ctx.arc(tipX+side*2,tipY-5,2.3,0,Math.PI*2);ctx.fillStyle='#d8e400';ctx.fill();
+      }
     }
     ctx.restore();
   }
