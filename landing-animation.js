@@ -5,7 +5,7 @@
   const sound = document.querySelector('#sound');
   const files = {
     plane:'robot-pilot-wheels-repaired.webp',
-    boat:'robot-ship.webp',
+    boat:'robot-ship.webp', narwhal:'narwhal-cameo.png',
     rocket:'robot-rocket.webp',
     cloud1:'landing-cloud-1.webp', cloud2:'landing-cloud-2.webp', cloud3:'landing-cloud-3.webp',
     ring:'landing-planet-ring.webp', crater:'landing-planet-crater.webp'
@@ -79,8 +79,18 @@
         ctx.quadraticCurveTo(x+span*.68,y+5,x+span,y);
       }
     }
-    draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)),h*.51+Math.sin(p*12)*10,
-      w*(portrait?.91:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
+    // The whale rises once, pauses beside the boat, then sinks below the surface.
+    const ease=v=>v*v*(3-2*v);
+    const rise=p<.17?0:p<.37?ease((p-.17)/.2):p<.64?1:p<.86?1-ease((p-.64)/.22):0;
+    draw('boat',w*(.5+(p-.5)*(portrait?.05:.11)-(portrait?.1*rise:0)),h*.51+Math.sin(p*12)*10,
+      w*(portrait?.91-.22*rise:.57),h*(portrait?.42:.6),Math.sin(p*10)*.012);
+    if(rise>0){
+      const narwhalWidth=w*(portrait?.29:.23);
+      const narwhalHeight=Math.min(narwhalWidth*800/1170,h*.27);
+      const nx=w*(portrait?.84:.86)+Math.sin(p*8)*w*.01;
+      const ny=waterline+narwhalHeight*(.55-rise);
+      draw('narwhal',nx,ny,narwhalWidth,narwhalHeight,Math.sin(p*7)*.025);
+    }
     ctx.save();
     wavePath(waterline,p*w*.25);
     ctx.lineTo(w+200,h+20);ctx.lineTo(-200,h+20);ctx.closePath();
