@@ -1,1 +1,41 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>fw/r — Flying With Robots</title>
+  <meta name="description" content="Flying With Robots. AI, robotics, and LiDAR. Coming soon.">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+  <main aria-label="Flying With Robots">
+    <video id="journey" class="journey" autoplay muted loop playsinline preload="auto" poster="poster.jpg" aria-label="Robinson journeys by plane, submarine, balloon, horse, ship, car, and rocket before the Flying With Robots announcement">
+      <source src="exports/fwr-journey-acoustic-score.mp4" type="video/mp4">
+      Your browser cannot play this video.
+    </video>
+    <button id="sound" class="sound" type="button" aria-label="Turn sound on">sound on</button>
+  </main>
+  <script>
+    const video = document.getElementById('journey');
+    const sound = document.getElementById('sound');
+    sound.addEventListener('click', async () => {
+      if (video.muted) {
+        video.muted = false;
+        video.currentTime = 0;
+        sound.textContent = 'sound off';
+        sound.setAttribute('aria-label', 'Turn sound off');
+        try { await video.play(); } catch (_) {
+          video.muted = true;
+          sound.textContent = 'sound on';
+          sound.setAttribute('aria-label', 'Turn sound on');
+        }
+      } else {
+        video.muted = true;
+        sound.textContent = 'sound on';
+        sound.setAttribute('aria-label', 'Turn sound on');
+      }
+    });
+  </script>
+</body>
+</html>
